@@ -25,7 +25,8 @@ namespace AW3D
 
         public void Activate()
         {
-            MessageBox.Show("Take a picture after each teleport.");
+            fileLeft = null;
+            fileRight = null;
             aworld = Process.GetProcessesByName("aworld").First();
             SetForegroundWindow(aworld.MainWindowHandle);
             String awpath = aworld.MainModule.FileName;
@@ -47,7 +48,7 @@ namespace AW3D
                 if(fileLeft == null)
                 {
                     fileLeft = e.FullPath;
-                    Thread.Sleep(1000);
+                    Thread.Sleep(100);
                     SetForegroundWindow(aworld.MainWindowHandle);
                     coords.ShiftRight(0.06);
                     TeleportTo(coords);

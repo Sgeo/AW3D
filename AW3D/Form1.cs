@@ -21,5 +21,10 @@ namespace AW3D
         {
             ScreenshotMaker.Instance.Activate();
         }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
