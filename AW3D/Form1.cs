@@ -16,5 +16,10 @@ namespace AW3D
         {
             InitializeComponent();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ScreenshotMaker.Instance.TakeScreenshot();
+        }
     }
 }
