@@ -19,7 +19,7 @@ namespace AW3D
 
         private void button1_Click(object sender, EventArgs e)
         {
-            ScreenshotMaker.Instance.TakeScreenshot();
+            ScreenshotMaker.Instance.Activate();
         }
     }
 }

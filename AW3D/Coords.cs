@@ -47,5 +47,21 @@ namespace AW3D
             return coords;
         }
 
+        public void ShiftRight(double amount)
+        {
+            double omega = (Math.PI / 180) * (Convert.ToDouble(Angle));
+            NS += Convert.ToDecimal(amount * Math.Sin(omega));
+            EW += Convert.ToDecimal(amount * Math.Cos(omega));
+        }
+
+        override public string ToString()
+        {
+            return String.Format("{0:F3}{1} {2:F3}{3} {4:F3}a {5}",
+                Math.Abs(NS), Math.Sign(NS) >= 0 ? "N" : "S",
+                Math.Abs(EW), Math.Sign(EW) >= 0 ? "E" : "W",
+                Altitude, Angle);
+        }
+
+
     }
 }
