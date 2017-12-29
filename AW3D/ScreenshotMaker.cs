@@ -55,7 +55,7 @@ namespace AW3D
                     fileLeft = e.FullPath;
                     Thread.Sleep(100);
                     SetForegroundWindow(aworld.MainWindowHandle);
-                    coords.ShiftRight(0.06);
+                    coords.ShiftRight(0.006);
                     TeleportTo(coords);
                 } else if (fileRight == null)
                 {
@@ -103,8 +103,27 @@ namespace AW3D
         private void Finish()
         {
             Image left = Image.FromFile(fileLeft);
-            Image right = Image.FromFile(fileRight);
+            //Image right = Image.FromFile(fileRight);
+            Bitmap resultBitmap = new Bitmap(left.Width * 2, left.Height);
+            Graphics resultGraphics = Graphics.FromImage(resultBitmap);
+            resultGraphics.DrawImage(left, 0, 0);
+            //resultGraphics.DrawImage(right, left.Width, 0);
 
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "png files (*.png)|*.png";
+            save.FilterIndex = 0;
+            save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                using (Stream stream = save.OpenFile())
+                {
+                    resultBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
+            resultGraphics.Dispose();
+            resultBitmap.Dispose();
+            left.Dispose();
+            //right.Dispose();
         }
 
         private Process aworld;
