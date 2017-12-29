@@ -60,6 +60,7 @@ namespace AW3D
                 } else if (fileRight == null)
                 {
                     fileRight = e.FullPath;
+                    Thread.Sleep(100);
                     Finish();
                 }
 
@@ -92,7 +93,7 @@ namespace AW3D
         private void TeleportTo(Coords coords)
         {
             SendKeys.SendWait("%t");
-            Thread.Sleep(100);
+            Thread.Sleep(300);
             SendKeys.SendWait("t");
             Thread.Sleep(100);
             SendKeys.SendWait(coords.ToString());
@@ -100,19 +101,21 @@ namespace AW3D
             Thread.Sleep(100);
         }
 
+        [STAThread]
         private void Finish()
         {
             Image left = Image.FromFile(fileLeft);
-            //Image right = Image.FromFile(fileRight);
+            Image right = Image.FromFile(fileRight);
             Bitmap resultBitmap = new Bitmap(left.Width * 2, left.Height);
             Graphics resultGraphics = Graphics.FromImage(resultBitmap);
             resultGraphics.DrawImage(left, 0, 0);
-            //resultGraphics.DrawImage(right, left.Width, 0);
+            resultGraphics.DrawImage(right, right.Width, 0);
 
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "png files (*.png)|*.png";
             save.FilterIndex = 0;
             save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
             if (save.ShowDialog() == DialogResult.OK)
             {
                 using (Stream stream = save.OpenFile())
@@ -123,7 +126,7 @@ namespace AW3D
             resultGraphics.Dispose();
             resultBitmap.Dispose();
             left.Dispose();
-            //right.Dispose();
+            right.Dispose();
         }
 
         private Process aworld;
