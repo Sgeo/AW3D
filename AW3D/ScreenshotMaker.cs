@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -41,7 +42,11 @@ namespace AW3D
             SendKeys.SendWait("{ENTER}");
             Thread.Sleep(100);
 
-            FileSystemWatcher watcher = new FileSystemWatcher(Path.Combine(awdirectory, "screenshots"));
+            if (watcher != null)
+            {
+                watcher.EnableRaisingEvents = false;
+            }
+            watcher = new FileSystemWatcher(Path.Combine(awdirectory, "screenshots"));
             Coords coords = CoordFromGuid(guid);
             watcher.Created += new FileSystemEventHandler((object sender, FileSystemEventArgs e) =>
             {
@@ -55,11 +60,11 @@ namespace AW3D
                 } else if (fileRight == null)
                 {
                     fileRight = e.FullPath;
+                    Finish();
                 }
 
             });
             watcher.EnableRaisingEvents = true;
-
             
             TeleportTo(coords);
 
@@ -95,10 +100,18 @@ namespace AW3D
             Thread.Sleep(100);
         }
 
+        private void Finish()
+        {
+            Image left = Image.FromFile(fileLeft);
+            Image right = Image.FromFile(fileRight);
+
+        }
+
         private Process aworld;
         private string awdirectory;
         private string fileLeft = null;
         private string fileRight = null;
+        FileSystemWatcher watcher;
 
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
