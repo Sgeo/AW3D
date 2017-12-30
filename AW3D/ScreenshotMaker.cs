@@ -29,12 +29,10 @@ namespace AW3D
             fileLeft = null;
             fileRight = null;
             aworld = Process.GetProcessesByName("aworld").First();
-            SetForegroundWindow(aworld.MainWindowHandle);
+            ForegroundAW();
             String awpath = aworld.MainModule.FileName;
             awdirectory = Path.GetDirectoryName(awpath);
-            SendKeys.SendWait("%t");
-            Thread.Sleep(100);
-            SendKeys.SendWait("r");
+            PostMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(144), IntPtr.Zero);
             Thread.Sleep(100);
             Guid guid = Guid.NewGuid();
             SendKeys.SendWait("3D Screenshot " + guid.ToString());
@@ -54,7 +52,7 @@ namespace AW3D
                 {
                     fileLeft = e.FullPath;
                     Thread.Sleep(100);
-                    SetForegroundWindow(aworld.MainWindowHandle);
+                    ForegroundAW();
                     coords.ShiftRight(0.006);
                     TeleportTo(coords);
                 } else if (fileRight == null)
@@ -71,6 +69,19 @@ namespace AW3D
 
 
 
+        }
+
+        private void ForegroundAW()
+        {
+            while (GetForegroundWindow() == aworld.MainWindowHandle)
+            {
+                // Wait for something to background AW
+            }
+            Thread.Sleep(100);
+            while (GetForegroundWindow() != aworld.MainWindowHandle)
+            {
+                SetForegroundWindow(aworld.MainWindowHandle);
+            }
         }
 
 
@@ -92,9 +103,8 @@ namespace AW3D
 
         private void TeleportTo(Coords coords)
         {
-            SendKeys.SendWait("%t");
-            Thread.Sleep(300);
-            SendKeys.SendWait("t");
+
+            SendMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(128), IntPtr.Zero);
             Thread.Sleep(100);
             SendKeys.SendWait(coords.ToString());
             SendKeys.SendWait("{ENTER}");
@@ -144,5 +154,18 @@ namespace AW3D
 
         [DllImport("user32.dll")]
         static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        public static extern int PostMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
+        private static int WM_COMMAND = 0x0111;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
     }
 }
