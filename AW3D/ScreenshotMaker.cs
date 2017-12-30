@@ -144,7 +144,17 @@ namespace AW3D
         private void Finish()
         {
             Image left = Image.FromFile(fileLeft);
-            Image right = Image.FromFile(fileRight);
+            Image right = null;
+            while (right == null)
+            {
+                try
+                {
+                    right = Image.FromFile(fileRight);
+                } catch(OutOfMemoryException e) // Represents file still being locked. Because Windows.
+                {
+                    // Loop
+                }
+            }
             Bitmap resultBitmap = new Bitmap(left.Width * 2, left.Height);
             Graphics resultGraphics = Graphics.FromImage(resultBitmap);
             resultGraphics.DrawImage(left, 0, 0);
