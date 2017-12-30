@@ -101,7 +101,6 @@ namespace AW3D
             Thread.Sleep(100);
         }
 
-        [STAThread]
         private void Finish()
         {
             Image left = Image.FromFile(fileLeft);
@@ -116,17 +115,25 @@ namespace AW3D
             save.FilterIndex = 0;
             save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-            if (save.ShowDialog() == DialogResult.OK)
+            Thread workaroundThread = new System.Threading.Thread(() =>
             {
-                using (Stream stream = save.OpenFile())
+                if (save.ShowDialog() == DialogResult.OK)
                 {
-                    resultBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    using (Stream stream = save.OpenFile())
+                    {
+                        resultBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    }
                 }
-            }
-            resultGraphics.Dispose();
-            resultBitmap.Dispose();
-            left.Dispose();
-            right.Dispose();
+                resultGraphics.Dispose();
+                resultBitmap.Dispose();
+                left.Dispose();
+                right.Dispose();
+                File.Delete(fileLeft);
+                File.Delete(fileRight);
+            });
+            workaroundThread.SetApartmentState(System.Threading.ApartmentState.STA);
+            workaroundThread.Start();
+            workaroundThread.Join();
         }
 
         private Process aworld;
