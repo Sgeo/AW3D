@@ -33,12 +33,15 @@ namespace AW3D
             String awpath = aworld.MainModule.FileName;
             awdirectory = Path.GetDirectoryName(awpath);
             PostMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(144), IntPtr.Zero);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
+            IntPtr rememberMe = FindWindow("#32770", "Remember current location");
+            //IntPtr rememberMeEdit = FindWindowEx(aworld.MainWindowHandle, IntPtr.Zero, "Edit", "");
+            IntPtr rememberMeEdit = FindWindowEx(rememberMe, IntPtr.Zero, "Edit", null);
             Guid guid = Guid.NewGuid();
-            SendKeys.SendWait("3D Screenshot " + guid.ToString());
-            Thread.Sleep(100);
-            SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(100);
+            //SendKeys.SendWait("3D Screenshot " + guid.ToString());
+            //PostMessage(rememberMeEdit, WM_SETTEXT, IntPtr.Zero, "3D Screenshot " + guid.ToString());
+            SendTextMessage(rememberMeEdit, "3D Screenshot " + guid.ToString());
+            PostMessage(rememberMe, WM_COMMAND, new IntPtr(1), IntPtr.Zero);
 
             if (watcher != null)
             {
@@ -48,14 +51,15 @@ namespace AW3D
             Coords coords = CoordFromGuid(guid);
             watcher.Created += new FileSystemEventHandler((object sender, FileSystemEventArgs e) =>
             {
-                if(fileLeft == null)
+                if (fileLeft == null)
                 {
                     fileLeft = e.FullPath;
                     Thread.Sleep(100);
                     ForegroundAW();
                     coords.ShiftRight(0.006);
                     TeleportTo(coords);
-                } else if (fileRight == null)
+                }
+                else if (fileRight == null)
                 {
                     fileRight = e.FullPath;
                     Thread.Sleep(100);
@@ -64,11 +68,20 @@ namespace AW3D
 
             });
             watcher.EnableRaisingEvents = true;
-            
+
             TeleportTo(coords);
 
 
 
+        }
+
+        private static void SendTextMessage(IntPtr hwnd, string text)
+        {
+            foreach (char c in text)
+            {
+                PostMessage(hwnd, WM_CHAR, new IntPtr(c), IntPtr.Zero);
+            }
+            
         }
 
         private void ForegroundAW()
@@ -162,10 +175,17 @@ namespace AW3D
         public static extern int SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
         [DllImport("user32.dll")]
         public static extern int PostMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        public static extern int PostMessage(IntPtr hWnd, int wMsg, IntPtr wParam, string lParam);
 
         private static int WM_COMMAND = 0x0111;
+        private static int WM_SETTEXT = 0x000C;
+        private static int WM_CHAR = 0x0102;
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string className, string windowTitle);
+
     }
 }
