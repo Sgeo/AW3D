@@ -1,9 +1,8 @@
 # AW3D
-Tool to take 3D stereoscopic screenshots of Active Worlds.
+Tool to take 3D stereoscopic screenshots of Active Worlds. Be aware this might break on future AW versions or non-English versions.
 
 ## Usage
 
-1. Ensure that Show -> Classic Bars is selected in Active Worlds.
 1. Open the program, click the button
 1. Wait to get teleported.
 1. Click the Screen Shot button in Active Worlds.
