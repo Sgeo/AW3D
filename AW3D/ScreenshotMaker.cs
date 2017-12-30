@@ -78,10 +78,7 @@ namespace AW3D
 
         private void ForegroundAW()
         {
-            while (GetForegroundWindow() == aworld.MainWindowHandle)
-            {
-                // Wait for something to background AW
-            }
+
             Thread.Sleep(100);
             while (GetForegroundWindow() != aworld.MainWindowHandle)
             {
