@@ -33,15 +33,9 @@ namespace AW3D
             String awpath = aworld.MainModule.FileName;
             awdirectory = Path.GetDirectoryName(awpath);
             PostMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(144), IntPtr.Zero);
-            Thread.Sleep(1000);
-            IntPtr rememberMe = FindWindow("#32770", "Remember current location");
-            //IntPtr rememberMeEdit = FindWindowEx(aworld.MainWindowHandle, IntPtr.Zero, "Edit", "");
-            IntPtr rememberMeEdit = FindWindowEx(rememberMe, IntPtr.Zero, "Edit", null);
             Guid guid = Guid.NewGuid();
-            //SendKeys.SendWait("3D Screenshot " + guid.ToString());
-            //PostMessage(rememberMeEdit, WM_SETTEXT, IntPtr.Zero, "3D Screenshot " + guid.ToString());
-            SendTextMessage(rememberMeEdit, "3D Screenshot " + guid.ToString());
-            PostMessage(rememberMe, WM_COMMAND, new IntPtr(1), IntPtr.Zero);
+
+            SendTextToDialog("Remember current location", "3D Screenshot " + guid.ToString());
 
             if (watcher != null)
             {
@@ -54,7 +48,6 @@ namespace AW3D
                 if (fileLeft == null)
                 {
                     fileLeft = e.FullPath;
-                    Thread.Sleep(100);
                     ForegroundAW();
                     coords.ShiftRight(0.006);
                     TeleportTo(coords);
@@ -62,7 +55,6 @@ namespace AW3D
                 else if (fileRight == null)
                 {
                     fileRight = e.FullPath;
-                    Thread.Sleep(100);
                     Finish();
                 }
 
@@ -100,28 +92,53 @@ namespace AW3D
 
         private Coords CoordFromGuid(Guid guid)
         {
-            using (StreamReader teleportStream = new StreamReader(Path.Combine(awdirectory, "teleport.txt")))
+            Coords result = null;
+            while (result == null)
             {
-                String line;
-                while ((line = teleportStream.ReadLine()) != null)
+                Thread.Sleep(100);
+                try
                 {
-                    if (line.EndsWith("3D Screenshot " + guid.ToString()))
+                    using (StreamReader teleportStream = new StreamReader(Path.Combine(awdirectory, "teleport.txt")))
                     {
-                        return Coords.Parse(line);
+                        String line;
+                        while ((line = teleportStream.ReadLine()) != null)
+                        {
+                            if (line.EndsWith("3D Screenshot " + guid.ToString()))
+                            {
+                                result = Coords.Parse(line);
+                            }
+                        }
                     }
+                } catch(IOException e)
+                {
+                    // Let the code try again
                 }
-                return null;
             }
+            return result;
+
         }
 
         private void TeleportTo(Coords coords)
         {
 
-            SendMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(128), IntPtr.Zero);
-            Thread.Sleep(100);
-            SendKeys.SendWait(coords.ToString());
-            SendKeys.SendWait("{ENTER}");
-            Thread.Sleep(100);
+            PostMessage(aworld.MainWindowHandle, WM_COMMAND, new IntPtr(128), IntPtr.Zero);
+            SendTextToDialog("Teleport", coords.ToString());
+        }
+
+        private void SendTextToDialog(string dialog, string text)
+        {
+            IntPtr dialogHwnd = IntPtr.Zero;
+            while (dialogHwnd == IntPtr.Zero)
+            {
+                dialogHwnd = FindWindow("#32770", dialog);
+            }
+            IntPtr dialogEdit = IntPtr.Zero;
+            while (dialogEdit == IntPtr.Zero)
+            {
+                dialogEdit = FindWindowEx(dialogHwnd, IntPtr.Zero, "Edit", null);
+            }
+            SendTextMessage(dialogEdit, text);
+            PostMessage(dialogHwnd, WM_COMMAND, new IntPtr(1), IntPtr.Zero);
         }
 
         private void Finish()
