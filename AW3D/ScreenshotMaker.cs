@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -24,7 +25,7 @@ namespace AW3D
             }
         }
 
-        public void Activate()
+        public void Activate(ISynchronizeInvoke syncronizable)
         {
             fileLeft = null;
             fileRight = null;
@@ -59,6 +60,7 @@ namespace AW3D
                 }
 
             });
+            watcher.SynchronizingObject = syncronizable;
             watcher.EnableRaisingEvents = true;
 
             TeleportTo(coords);
@@ -162,25 +164,19 @@ namespace AW3D
             save.FilterIndex = 0;
             save.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
-            Thread workaroundThread = new System.Threading.Thread(() =>
+            if (save.ShowDialog() == DialogResult.OK)
             {
-                if (save.ShowDialog() == DialogResult.OK)
+                using (Stream stream = save.OpenFile())
                 {
-                    using (Stream stream = save.OpenFile())
-                    {
-                        resultBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                    }
+                    resultBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 }
-                resultGraphics.Dispose();
-                resultBitmap.Dispose();
-                left.Dispose();
-                right.Dispose();
-                File.Delete(fileLeft);
-                File.Delete(fileRight);
-            });
-            workaroundThread.SetApartmentState(System.Threading.ApartmentState.STA);
-            workaroundThread.Start();
-            workaroundThread.Join();
+            }
+            resultGraphics.Dispose();
+            resultBitmap.Dispose();
+            left.Dispose();
+            right.Dispose();
+            File.Delete(fileLeft);
+            File.Delete(fileRight);
         }
 
         private Process aworld;
